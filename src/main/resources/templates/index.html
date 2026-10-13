@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Bức ảnh của ngày - NASA</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 30px 100px; }
+        #img-of-the-day { max-width: 100%; height: auto; border-radius: 8px; margin-bottom: 20px; }
+        .comment-item { border-bottom: 1px solid #ccc; padding: 10px 0; }
+        .like-btn { background-color: #007bff; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<h2>BỨC ẢNH CỦA NGÀY (NASA APOD)</h2>
+
+<!-- Ảnh lấy từ API NASA -->
+<img id="img-of-the-day" alt="NASA Image of the day loading...">
+
+<!-- Form đánh giá -->
+<form th:action="@{/nasa/comment}" th:object="${commentForm}" method="post">
+    <div>
+        <select th:field="*{score}">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+        </select>
+    </div>
+    <br/>
+    <div>
+        <label>Author:</label><br/>
+        <input type="text" th:field="*{author}" required />
+    </div>
+    <br/>
+    <div>
+        <label>Feedback:</label><br/>
+        <textarea th:field="*{feedback}" rows="4" cols="50" required></textarea>
+    </div>
+    <br/>
+    <button type="submit">Comment</button>
+</form>
+
+<hr/>
+
+<h3>Danh sách nhận xét hôm nay:</h3>
+
+<div th:each="c : ${comments}" class="comment-item">
+    <p>
+        <strong th:text="${'+' + c.score + ' ' + c.feedback}"></strong>
+        (Bởi: <span th:text="${c.author}"></span> - <span th:text="${c.date}"></span>)
+    </p>
+    <form th:action="@{/nasa/like/{id}(id=${c.id})}" method="post" style="display:inline;">
+        <button type="submit" class="like-btn">
+            Like (<span th:text="${c.likes}">0</span>)
+        </button>
+    </form>
+</div>
+
+<!-- Script gọi API NASA -->
+<script>
+    // Thay your_api_key_here bằng API key bạn đã tạo (hoặc dùng DEMO_KEY để test nhanh)
+    let apiKey = 'S1O0MvmlcuQ5urqfaUgt9kqyCUxs2QTI3Eb8UDT1';
+    let query = 'https://api.nasa.gov/planetary/apod?api_key=' + apiKey;
+    let request = new XMLHttpRequest();
+    request.open('GET', query);
+    request.onload = function() {
+        if (request.status === 200) {
+            let response = JSON.parse(request.responseText);
+            document.getElementById('img-of-the-day').setAttribute('src', response.url);
+        }
+    };
+    request.send();
+</script>
+
+</body>
+</html>
